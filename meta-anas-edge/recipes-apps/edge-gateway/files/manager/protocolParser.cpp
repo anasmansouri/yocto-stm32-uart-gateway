@@ -32,8 +32,8 @@ namespace cc::manager {
 
     cc::utils::Result<Telemetry> ProtocolParser::parseStatus(std::string line){
         Telemetry data;
-        int matched = std::sscanf(line.c_str(), "STATUS: TEMP : %d| HUM=%d", &(data.temperature), &(data.humidity));
-        if(matched==2){
+        int matched = std::sscanf(line.c_str(), "STATUS:TEMP=%d;HUM=%d;LOAD=%d", &(data.temperature), &(data.humidity),&(data.load));
+        if(matched==3){
             return cc::utils::Result<Telemetry>::ok(data);
         }else{
             return cc::utils::Result<Telemetry>::fail(cc::utils::ErrorCode::ParseError,"can't parse data");

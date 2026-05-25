@@ -10,8 +10,7 @@
 
 int main(){
     std::ofstream log("/var/log/edge-gateway.log", std::ios::app);
-    std::string uart_device = "/dev/ttyAMA0";
-    cc::manager::UartManager uartManager(uart_device);
+    cc::manager::UartManager uartManager("/dev/ttyAMA0");
     if(!uartManager.openUartDevice()){
         return -1;
     }
@@ -27,12 +26,12 @@ int main(){
             continue;
         }
         log <<"PI sent PING"<<std::endl<<std::flush; 
-        cc::utils::Result<std::string>msg = uartManager.readLine();
-        if(!msg){
+        cc::utils::Result<std::string> response= uartManager.readLine();
+        if(!response){
             log<<"PI can' read"<<std::endl<<std::flush;
             continue;
         }
-        if(protocolParser.isAckandPing(msg.unwrap())){
+        if(protocolParser.isAckandPing(response.unwrap())){
             log<<"PING received : "<<std::endl;
             break;
         }
@@ -56,20 +55,19 @@ int main(){
             log<<"writing fail "<<std::endl<<std::flush;
         }
         log<<"PI Sent : "<<cmd<<std::endl<<std::flush;
-        cc::utils::Result<std::string>msg = uartManager.readLine();
+        cc::utils::Result<std::string> response = uartManager.readLine();
 
-        if(msg){
-            log<<"STM32 REPLIES : "<<msg.unwrap()<<std::endl<<std::flush;
-            if(protocolParser.isAck(msg.unwrap()).unwrap()){
-                log<<"ack msg"<<std::endl<<std::flush;
-            }else if(protocolParser.isNAck(msg.unwrap()).unwrap()){
-                log<<"Nack msg"<<std::endl<<std::flush;
-            }else if(protocolParser.isStatus(msg.unwrap()).unwrap()){
-                cc::utils::Result<cc::manager::Telemetry> data = protocolParser.parseStatus(msg.unwrap());
+        if(response){
+            log<<"STM32 REPLIES : "<<response.unwrap()<<std::endl<<std::flush;
+            if(protocolParser.isAck(response.unwrap()).unwrap()){
+                log<<"ack response"<<std::endl<<std::flush;
+            }else if(protocolParser.isNAck(response.unwrap()).unwrap()){
+                log<<"Nack response"<<std::endl<<std::flush;
+            }else if(protocolParser.isStatus(response.unwrap()).unwrap()){
+                cc::utils::Result<cc::manager::Telemetry> data = protocolParser.parseStatus(response.unwrap());
                 if(data){
-                    log<<"temp hya :"<<data.unwrap().temperature<<" hum hya : "<<data.unwrap().humidity<<std::endl<<std::flush;
+                    log<<"temperature : "<<data.unwrap().temperature<<" humidity : "<<data.unwrap().humidity<<"load : "<<data.unwrap().load<<"%"<<std::endl<<std::flush;
                 }else{
-
                     log<<"wlah ma3reft n parsi data"<<std::endl<<std::flush;
                 }
             }

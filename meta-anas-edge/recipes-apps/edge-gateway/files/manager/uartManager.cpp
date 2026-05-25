@@ -90,7 +90,6 @@ namespace cc::manager
     {
         std::string line = std::format("{}\n",msg);
         int num_bytes_written = write(this->fd, line.c_str(),line.length());
-        std::cerr<<"msg sent : "<<line<<std::endl;
         if (num_bytes_written < 0)
         {
             return cc::utils::Result<void>::fail(cc::utils::ErrorCode::UartWriteFailed, "write failed");

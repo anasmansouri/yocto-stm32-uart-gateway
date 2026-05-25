@@ -13,6 +13,7 @@ enum class MSG_TYPE:uint8_t{
 struct Telemetry{
     int temperature;
     int humidity;
+    int load;
 };
 class ProtocolParser{
     public:
