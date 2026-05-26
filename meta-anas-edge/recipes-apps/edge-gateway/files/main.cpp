@@ -5,9 +5,17 @@
 #include "manager/uartManager.hpp"
 #include "manager/protocolParser.hpp"
 #include "utils/Result.hpp"
-#include <unistd.h>
+#include <unistd.h> 
 #include <cstring>
+#include <thread>
+#include <chrono>
 
+enum class LED_STATE{
+    OFF,
+    ON_YELLOW,
+    ON_RED,
+    ON_GREEN
+};
 int main(){
     std::ofstream log("/var/log/edge-gateway.log", std::ios::app);
     cc::manager::UartManager uartManager("/dev/ttyAMA0");
@@ -35,20 +43,20 @@ int main(){
             log<<"PING received : "<<std::endl;
             break;
         }
-        sleep(5);
+        std::this_thread::sleep_for(std::chrono::milliseconds(500));
+
     }
 
     int counter=0;
     bool led_on=1;
+    std::string cmd;
+    LED_STATE old_led_state={LED_STATE::OFF};
+    LED_STATE current_led_state{LED_STATE::OFF};
     while (true) {
-
-        counter++;
-        std::string cmd;
-        if(counter%2==0){
+        if(old_led_state==current_led_state){
            cmd = "GET_STATUS";
         }else{
-            cmd = led_on ? "LED_OFF" : "LED_ON";
-            led_on = !led_on;
+            old_led_state=current_led_state;
         }
 
         if(!uartManager.writeLine(cmd)){
@@ -67,11 +75,25 @@ int main(){
                 cc::utils::Result<cc::manager::Telemetry> data = protocolParser.parseStatus(response.unwrap());
                 if(data){
                     log<<"temperature : "<<data.unwrap().temperature<<" humidity : "<<data.unwrap().humidity<<"load : "<<data.unwrap().load<<"%"<<std::endl<<std::flush;
+                    if(data.unwrap().load>75){
+                        log<<"LED needs to be RED"<<std::endl<<std::flush;
+                        cmd="SET_LED:RED";
+                        current_led_state=LED_STATE::ON_RED;
+                    }else if (data.unwrap().load<40) {
+                        log<<"LED needs to be GREEN"<<std::endl<<std::flush;
+                        cmd="SET_LED:GREEN";
+                        current_led_state=LED_STATE::ON_GREEN;
+                    }else{
+                        log<<"LED needs to be YELLOW"<<std::endl<<std::flush;
+                        cmd="SET_LED:YELLOW";
+                        current_led_state=LED_STATE::ON_YELLOW;
+                    }
                 }else{
                     log<<"wlah ma3reft n parsi data"<<std::endl<<std::flush;
+                    // cmd="SET_LED:OFF";
                 }
             }
         }
-        sleep(10);
+      std::this_thread::sleep_for(std::chrono::milliseconds(500));
     }
 }
