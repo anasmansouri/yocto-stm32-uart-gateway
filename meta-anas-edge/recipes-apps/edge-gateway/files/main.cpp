@@ -74,7 +74,7 @@ int main(){
             }else if(protocolParser.isStatus(response.unwrap()).unwrap()){
                 cc::utils::Result<cc::manager::Telemetry> data = protocolParser.parseStatus(response.unwrap());
                 if(data){
-                    log<<"temperature : "<<data.unwrap().temperature<<" humidity : "<<data.unwrap().humidity<<"load : "<<data.unwrap().load<<"%"<<std::endl<<std::flush;
+                    log<<"temperature : "<<data.unwrap().temperature<<" humidity : "<<data.unwrap().humidity<<"load : "<<data.unwrap().load<<"%"<<"dht status : "<<data.unwrap().dht_status<<"load status : "<<data.unwrap().load_status<<"system status : "<<data.unwrap().system_status<<std::endl<<std::flush;
                     if(data.unwrap().load>75){
                         log<<"LED needs to be RED"<<std::endl<<std::flush;
                         cmd="SET_LED:RED";
