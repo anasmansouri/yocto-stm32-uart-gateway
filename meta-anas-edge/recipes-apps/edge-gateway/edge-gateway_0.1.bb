@@ -10,6 +10,8 @@ SRC_URI = "file://CMakeLists.txt \
            file://manager/uartManager.hpp \
            file://manager/protocolParser.cpp \
            file://manager/protocolParser.hpp \
+           file://manager/ipcServer.hpp \
+           file://manager/ipcServer.cpp \
            file://utils/Result.cpp \
            file://utils/Result.hpp \
            file://LICENSE \

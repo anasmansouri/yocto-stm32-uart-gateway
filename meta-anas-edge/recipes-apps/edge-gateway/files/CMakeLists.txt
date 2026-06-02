@@ -28,6 +28,7 @@ target_include_directories(
 add_library(edge_manager 
     manager/uartManager.cpp manager/uartManager.hpp 
     manager/protocolParser.cpp manager/protocolParser.hpp 
+    manager/ipcServer.cpp manager/ipcServer.hpp
 )
 target_include_directories(
     edge_manager PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}
